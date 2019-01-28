@@ -25,8 +25,8 @@
 #include "openssl/rsa.h"
 #include "openssl/sha.h"
 
-namespace openssl {
-namespace cbs {
+namespace Openssl {
+namespace Cbs {
 
 Cbs::Cbs(const uint8_t *data, size_t len) {
   data_ = data;
@@ -350,5 +350,5 @@ int parse_integer(Cbs *cbs, BIGNUM **out) {
   return bn_parse_asn1_unsigned(cbs, *out);
 }
 
-}  // namespace cbs
-}  // namespace openssl
+}  // namespace Cbs
+}  // namespace Openssl

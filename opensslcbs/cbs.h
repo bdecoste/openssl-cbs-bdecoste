@@ -25,8 +25,8 @@
 #define CBS_ASN1_TAG_NUMBER_MASK ((1u << (5 + CBS_ASN1_TAG_SHIFT)) - 1)
 #define CBS_ASN1_INTEGER 0x2u
 
-namespace openssl {
-namespace cbs {
+namespace Openssl {
+namespace Cbs {
 
 class Cbs {
   public:
@@ -54,5 +54,5 @@ int parse_integer(Cbs *cbs, BIGNUM **out);
 
 
 
-}  // namespace cbs
-}  // namespace openssl
+}  // namespace Cbs
+}  // namespace Openssl
