@@ -7,10 +7,10 @@ exports_files(["LICENSE"])
 cc_library(
     name = "openssl_cbs_lib",
     srcs = [
-        "src/cbs.cc",
+        "opensslcbs/cbs.cc",
     ],
     hdrs = [
-        "src/cbs.h",
+        "opensslcbs/cbs.h",
     ],
     deps = [
         "//external:abseil_strings",
