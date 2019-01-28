@@ -1,3 +1,5 @@
+workspace(name = "openssl_cbs")
+
 load(
     "//:repositories.bzl",
     "abseil_repositories",
