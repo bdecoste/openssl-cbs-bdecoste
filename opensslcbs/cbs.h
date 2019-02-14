@@ -31,6 +31,7 @@
 
 class CBS {
   public:
+	CBS();
 	CBS(const uint8_t *data, size_t len);
 	const uint8_t *data_;
 	size_t len_;

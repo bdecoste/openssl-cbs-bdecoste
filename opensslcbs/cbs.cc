@@ -28,6 +28,9 @@
 //namespace Openssl {
 //namespace Cbs {
 
+CBS::CBS() {
+}
+
 CBS::CBS(const uint8_t *data, size_t len) {
   data_ = data;
   len = len;
