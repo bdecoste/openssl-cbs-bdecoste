@@ -33,7 +33,7 @@ CBS::CBS(const uint8_t *data, size_t len) {
   len = len;
 }
 
-int bn_cmp_word(BIGNUM *a, BN_ULONG b) {
+int BN_cmp_word(BIGNUM *a, BN_ULONG b) {
   BIGNUM* b_bn = BN_new();
 
   BN_set_word(b_bn, b);
@@ -320,7 +320,7 @@ int parse_asn1_tag(CBS *cbs, unsigned *out) {
   return 1;
 }
 
-int bn_parse_asn1_unsigned(CBS *cbs, BIGNUM *ret) {
+int BN_parse_asn1_unsigned(CBS *cbs, BIGNUM *ret) {
   CBS child(NULL, 0);
   if (!CBS_get_asn1(cbs, &child, CBS_ASN1_INTEGER) || child.len_ == 0) {
 //      OPENSSL_PUT_ERROR(BN, BN_R_BAD_ENCODING);
@@ -377,7 +377,7 @@ int parse_integer(CBS *cbs, BIGNUM **out) {
   if (*out == NULL) {
     return 0;
   }
-  return bn_parse_asn1_unsigned(cbs, *out);
+  return BN_parse_asn1_unsigned(cbs, *out);
 }
 
 //}  // namespace Cbs

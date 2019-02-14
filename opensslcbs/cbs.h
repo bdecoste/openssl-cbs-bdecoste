@@ -36,8 +36,8 @@ class CBS {
 	size_t len_;
 };
 
-int bn_cmp_word(BIGNUM *a, BN_ULONG b);
-int bn_parse_asn1_unsigned(CBS *cbs, BIGNUM *ret);
+int BN_cmp_word(BIGNUM *a, BN_ULONG b);
+int BN_parse_asn1_unsigned(CBS *cbs, BIGNUM *ret);
 
 RSA* RSA_public_key_from_bytes(const uint8_t *in, size_t in_len);
 RSA* RSA_parse_public_key(CBS *cbs);
