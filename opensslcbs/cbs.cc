@@ -45,16 +45,16 @@ int bn_cmp_word(BIGNUM *a, BN_ULONG b) {
   return result;
 }
 
-RSA* public_key_from_bytes(const uint8_t *in, size_t in_len) {
+RSA* RSA_public_key_from_bytes(const uint8_t *in, size_t in_len) {
   CBS cbs(in, in_len);
-  RSA* ret = parse_public_key(&cbs);
+  RSA* ret = RSA_parse_public_key(&cbs);
   if (ret == NULL) {
     return NULL;
   }
   return ret;
 }
 
-RSA* parse_public_key(CBS *cbs) {
+RSA* RSA_parse_public_key(CBS *cbs) {
 	RSA *rsa = RSA_new();
   if (rsa == NULL) {
 	  return NULL;
