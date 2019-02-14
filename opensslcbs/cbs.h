@@ -24,9 +24,10 @@
 #define CBS_ASN1_SEQUENCE (0x10u | CBS_ASN1_CONSTRUCTED)
 #define CBS_ASN1_TAG_NUMBER_MASK ((1u << (5 + CBS_ASN1_TAG_SHIFT)) - 1)
 #define CBS_ASN1_INTEGER 0x2u
+#define CBS_ASN1_CONTEXT_SPECIFIC (0x80u << CBS_ASN1_TAG_SHIFT)
 
-namespace Openssl {
-namespace Cbs {
+//namespace Openssl {
+//namespace Cbs {
 
 class CBS {
   public:
@@ -39,20 +40,25 @@ int bn_cmp_word(BIGNUM *a, BN_ULONG b);
 RSA* public_key_from_bytes(const uint8_t *in, size_t in_len);
 RSA* parse_public_key(CBS *cbs);
 int cbs_get_asn1(CBS *cbs, CBS *out, unsigned tag_value, int skip_header);
-int cbs_skip(CBS *cbs, size_t len);
-int cbs_get(CBS *cbs, const uint8_t **p, size_t n);
-int cbs_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag, size_t *out_header_len, int ber_ok);
-int cbs_get_u(CBS *cbs, uint32_t *out, size_t len);
-int cbs_get_bytes(CBS *cbs, CBS *out, size_t len);
-void cbs_init(CBS *cbs, const uint8_t *data, size_t len);
-int cbs_get_u8(CBS *cbs, uint8_t *out);
+int CBS_get_asn1(CBS *cbs, CBS *out, unsigned tag_value);
+int CBS_skip(CBS *cbs, size_t len);
+int CBS_get(CBS *cbs, const uint8_t **p, size_t n);
+int CBS_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag, size_t *out_header_len, int ber_ok);
+int CBS_get_u(CBS *cbs, uint32_t *out, size_t len);
+int CBS_get_bytes(CBS *cbs, CBS *out, size_t len);
+void CBS_init(CBS *cbs, const uint8_t *data, size_t len);
+int CBS_get_u8(CBS *cbs, uint8_t *out);
 int parse_asn1_tag(CBS *cbs, unsigned *out);
 int bn_parse_asn1_unsigned(CBS *cbs, BIGNUM *ret);
 int parse_base128_integer(CBS *cbs, uint64_t *out);
 int parse_integer(CBS *cbs, BIGNUM **out);
 
+int CBS_get_optional_asn1(CBS *cbs, CBS *out, int *out_present, unsigned tag);
+int CBS_peek_asn1_tag(const CBS *cbs, unsigned tag_value);
+size_t CBS_len(const CBS *cbs);
+int CBS_get_asn1_element(CBS *cbs, CBS *out, unsigned tag_value);
+const uint8_t *CBS_data(const CBS *cbs);
 
 
-
-}  // namespace Cbs
-}  // namespace Openssl
+//}  // namespace Cbs
+//}  // namespace Openssl

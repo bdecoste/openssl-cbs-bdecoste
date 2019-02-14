@@ -25,8 +25,8 @@
 #include "openssl/rsa.h"
 #include "openssl/sha.h"
 
-namespace Openssl {
-namespace Cbs {
+//namespace Openssl {
+//namespace Cbs {
 
 CBS::CBS(const uint8_t *data, size_t len) {
   data_ = data;
@@ -34,7 +34,6 @@ CBS::CBS(const uint8_t *data, size_t len) {
 }
 
 int bn_cmp_word(BIGNUM *a, BN_ULONG b) {
-	  std::cerr << "!!!!!!!!!!!!!!!! bn_cmp_word \n";
   BIGNUM* b_bn = BN_new();
 
   BN_set_word(b_bn, b);
@@ -47,7 +46,6 @@ int bn_cmp_word(BIGNUM *a, BN_ULONG b) {
 }
 
 RSA* public_key_from_bytes(const uint8_t *in, size_t in_len) {
-	  std::cerr << "!!!!!!!!!!!!!!!! public_key_from_bytes \n";
   CBS cbs(in, in_len);
   RSA* ret = parse_public_key(&cbs);
   if (ret == NULL) {
@@ -57,7 +55,6 @@ RSA* public_key_from_bytes(const uint8_t *in, size_t in_len) {
 }
 
 RSA* parse_public_key(CBS *cbs) {
-	  std::cerr << "!!!!!!!!!!!!!!!! parse_public_key \n";
 	RSA *rsa = RSA_new();
   if (rsa == NULL) {
 	  return NULL;
@@ -65,7 +62,7 @@ RSA* parse_public_key(CBS *cbs) {
   BIGNUM *bn_n = NULL;
   BIGNUM *bn_e = NULL;
   CBS child(NULL, 0);
-  if (!cbs_get_asn1(cbs, &child, CBS_ASN1_SEQUENCE, 1)){
+  if (!CBS_get_asn1(cbs, &child, CBS_ASN1_SEQUENCE)){
     RSA_free(rsa);
     return NULL;
   } else {
@@ -87,9 +84,12 @@ RSA* parse_public_key(CBS *cbs) {
   return rsa;
 }
 
+int CBS_get_asn1(CBS *cbs, CBS *out, unsigned tag_value) {
+  return cbs_get_asn1(cbs, out, tag_value, 1);
+}
+
 int cbs_get_asn1(CBS *cbs, CBS *out, unsigned tag_value,
                         int skip_header) {
-	  std::cerr << "!!!!!!!!!!!!!!!! cbs_get_asn1 \n";
   size_t header_len;
   unsigned tag;
   CBS throwaway(NULL, 0);
@@ -98,12 +98,12 @@ int cbs_get_asn1(CBS *cbs, CBS *out, unsigned tag_value,
     out = &throwaway;
   }
 
-  if (!cbs_get_any_asn1_element(cbs, out, &tag, &header_len, 0) ||
+  if (!CBS_get_any_asn1_element(cbs, out, &tag, &header_len, 0) ||
       tag != tag_value) {
     return 0;
   }
 
-  if (skip_header && !cbs_skip(out, header_len)) {
+  if (skip_header && !CBS_skip(out, header_len)) {
     assert(0);
     return 0;
   }
@@ -111,12 +111,12 @@ int cbs_get_asn1(CBS *cbs, CBS *out, unsigned tag_value,
   return 1;
 }
 
-int cbs_skip(CBS *cbs, size_t len) {
+int CBS_skip(CBS *cbs, size_t len) {
   const uint8_t *dummy;
-  return cbs_get(cbs, &dummy, len);
+  return CBS_get(cbs, &dummy, len);
 }
 
-int cbs_get(CBS *cbs, const uint8_t **p, size_t n) {
+int CBS_get(CBS *cbs, const uint8_t **p, size_t n) {
   if (cbs->len_ < n) {
     return 0;
   }
@@ -127,7 +127,7 @@ int cbs_get(CBS *cbs, const uint8_t **p, size_t n) {
   return 1;
 }
 
-int cbs_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag,
+int CBS_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag,
                                     size_t *out_header_len, int ber_ok) {
   CBS header = *cbs;
   CBS throwaway(NULL, 0);
@@ -145,7 +145,7 @@ int cbs_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag,
   }
 
   uint8_t length_byte;
-  if (!cbs_get_u8(&header, &length_byte)) {
+  if (!CBS_get_u8(&header, &length_byte)) {
     return 0;
   }
 
@@ -172,7 +172,7 @@ int cbs_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag,
       if (out_header_len != NULL) {
         *out_header_len = header_len;
       }
-      return cbs_get_bytes(cbs, out, header_len);
+      return CBS_get_bytes(cbs, out, header_len);
     }
 
     // ITU-T X.690 clause 8.1.3.5.c specifies that the value 0xff shall not be
@@ -181,7 +181,7 @@ int cbs_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag,
     if (num_bytes == 0 || num_bytes > 4) {
       return 0;
     }
-    if (!cbs_get_u(&header, &len32, num_bytes)) {
+    if (!CBS_get_u(&header, &len32, num_bytes)) {
       return 0;
     }
     // ITU-T X.690 section 10.1 (DER length forms) requires encoding the length
@@ -205,14 +205,14 @@ int cbs_get_any_asn1_element(CBS *cbs, CBS *out, unsigned *out_tag,
     }
   }
 
-  return cbs_get_bytes(cbs, out, len);
+  return CBS_get_bytes(cbs, out, len);
 }
 
-int cbs_get_u(CBS *cbs, uint32_t *out, size_t len) {
+int CBS_get_u(CBS *cbs, uint32_t *out, size_t len) {
   uint32_t result = 0;
   const uint8_t *data;
 
-  if (!cbs_get(cbs, &data, len)) {
+  if (!CBS_get(cbs, &data, len)) {
     return 0;
   }
   for (size_t i = 0; i < len; i++) {
@@ -224,34 +224,72 @@ int cbs_get_u(CBS *cbs, uint32_t *out, size_t len) {
 }
 
 
-int cbs_get_bytes(CBS *cbs, CBS *out, size_t len) {
+int CBS_get_bytes(CBS *cbs, CBS *out, size_t len) {
   const uint8_t *v;
-  if (!cbs_get(cbs, &v, len)) {
+  if (!CBS_get(cbs, &v, len)) {
     return 0;
   }
-  cbs_init(out, v, len);
+  CBS_init(out, v, len);
   return 1;
 }
 
-void cbs_init(CBS *cbs, const uint8_t *data, size_t len) {
+void CBS_init(CBS *cbs, const uint8_t *data, size_t len) {
   cbs->data_ = data;
   cbs->len_ = len;
 }
 
-int cbs_get_u8(CBS *cbs, uint8_t *out) {
-	  std::cerr << "!!!!!!!!!!!!!!!! cbs_get_u8 \n";
+int CBS_get_u8(CBS *cbs, uint8_t *out) {
   const uint8_t *v;
-  if (!cbs_get(cbs, &v, 1)) {
+  if (!CBS_get(cbs, &v, 1)) {
     return 0;
   }
   *out = *v;
   return 1;
 }
 
+int CBS_get_optional_asn1(CBS *cbs, CBS *out, int *out_present, unsigned tag) {
+  int present = 0;
+
+  if (CBS_peek_asn1_tag(cbs, tag)) {
+	if (!CBS_get_asn1(cbs, out, tag)) {
+	  return 0;
+	}
+	present = 1;
+  }
+
+  if (out_present != NULL) {
+	*out_present = present;
+  }
+
+  return 1;
+}
+
+int CBS_peek_asn1_tag(const CBS *cbs, unsigned tag_value) {
+  if (CBS_len(cbs) < 1) {
+    return 0;
+  }
+
+  CBS copy = *cbs;
+  unsigned actual_tag;
+  return parse_asn1_tag(&copy, &actual_tag) && tag_value == actual_tag;
+}
+
+size_t CBS_len(const CBS *cbs) {
+  return cbs->len_;
+}
+
+int CBS_get_asn1_element(CBS *cbs, CBS *out, unsigned tag_value) {
+  return cbs_get_asn1(cbs, out, tag_value, 0 /* include header */);
+}
+
+const uint8_t *CBS_data(const CBS *cbs) {
+  return cbs->data_;
+}
+
+
 int parse_asn1_tag(CBS *cbs, unsigned *out) {
-	  std::cerr << "!!!!!!!!!!!!!!!! parse_asn1_tag \n";
   uint8_t tag_byte;
-  if (!cbs_get_u8(cbs, &tag_byte)) {
+  if (!CBS_get_u8(cbs, &tag_byte)) {
     return 0;
   }
 
@@ -283,9 +321,8 @@ int parse_asn1_tag(CBS *cbs, unsigned *out) {
 }
 
 int bn_parse_asn1_unsigned(CBS *cbs, BIGNUM *ret) {
-	  std::cerr << "!!!!!!!!!!!!!!!! bn_parse_asn1_unsigned \n";
   CBS child(NULL, 0);
-  if (!cbs_get_asn1(cbs, &child, CBS_ASN1_INTEGER, 1) || child.len_ == 0) {
+  if (!CBS_get_asn1(cbs, &child, CBS_ASN1_INTEGER) || child.len_ == 0) {
 //      OPENSSL_PUT_ERROR(BN, BN_R_BAD_ENCODING);
     return 0;
   }
@@ -308,11 +345,10 @@ int bn_parse_asn1_unsigned(CBS *cbs, BIGNUM *ret) {
 
 
 int parse_base128_integer(CBS *cbs, uint64_t *out) {
-	  std::cerr << "!!!!!!!!!!!!!!!! parse_base128_integer \n";
   uint64_t v = 0;
   uint8_t b;
   do {
-    if (!cbs_get_u8(cbs, &b)) {
+    if (!CBS_get_u8(cbs, &b)) {
       return 0;
     }
     if ((v >> (64 - 7)) != 0) {
@@ -344,5 +380,5 @@ int parse_integer(CBS *cbs, BIGNUM **out) {
   return bn_parse_asn1_unsigned(cbs, *out);
 }
 
-}  // namespace Cbs
-}  // namespace Openssl
+//}  // namespace Cbs
+//}  // namespace Openssl
