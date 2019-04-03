@@ -34,25 +34,3 @@ def abseil_repositories(bind = True):
             name = "abseil_time",
             actual = "@com_google_absl//absl/time:time",
         )
-    _cctz_repositories(bind)
-
-CCTZ_COMMIT = "e19879df3a14791b7d483c359c4acd6b2a1cd96b"
-CCTZ_SHA256 = "35d2c6cf7ddef1cf7c1bb054bdf2e8d7778242f6d199591a834c14d224b80c39"
-
-def _cctz_repositories(bind = True):
-    http_archive(
-        name = "com_googlesource_code_cctz",
-        url = "https://github.com/google/cctz/archive/" + CCTZ_COMMIT + ".tar.gz",
-        sha256 = CCTZ_SHA256,
-    )
-
-BAZEL_SKYLIB_RELEASE = "0.5.0"
-BAZEL_SKYLIB_SHA256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f"
-
-def _bazel_skylib_repositories():
-    http_archive(
-        name = "bazel_skylib",
-        sha256 = BAZEL_SKYLIB_SHA256,
-        strip_prefix = "bazel-skylib-" + BAZEL_SKYLIB_RELEASE,
-        url = "https://github.com/bazelbuild/bazel-skylib/archive/" + BAZEL_SKYLIB_RELEASE + ".tar.gz",
-    )
